@@ -1,25 +1,39 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export default function Game({ children }: { children: React.ReactNode[] }) {
     return (
-        <div className="relative h-[80vw] w-[80vw] md:h-[70vw] md:w-[70vw] lg:h-[50vw] lg:w-[50vw] xl:h-[40vw] xl:w-[40vw]">
+        <div className="relative h-[80vw] w-[80vw] md:h-[70vw] md:w-[70vw] lg:h-[50vw] lg:w-[50vw] xl:h-[30vw] xl:w-[30vw]">
             {children}
         </div>
     );
 }
 
+const gameboardVariants = {
+    hidden: { opacity: 0, scale: 0 },
+    show: {
+        opacity: 1,
+        scale: 1,
+        transition: { staggerChildren: 0.05, duration: 0.3 },
+    },
+};
+
 function GameBoard({ children }: { children: React.ReactNode[] }) {
     return (
-        <div
+        <motion.div
+            layout
+            variants={gameboardVariants}
+            initial="hidden"
+            animate="show"
             style={{
                 gridTemplateColumns: `repeat(${Math.ceil(Math.sqrt(children.length))}, 1fr)`,
             }}
             className="grid aspect-square h-full w-full gap-1 md:gap-2"
         >
             {children}
-        </div>
+        </motion.div>
     );
 }
 
@@ -33,6 +47,11 @@ interface GameCellProps
     isRevealed?: boolean;
 }
 
+const gameCellVariants = {
+    hidden: { opacity: 0, scale: 0 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+};
+
 function GameCell({
     selected = false,
     isTarget = false,
@@ -41,7 +60,9 @@ function GameCell({
     ...props
 }: GameCellProps) {
     return (
-        <div
+        <motion.div
+            layout
+            variants={gameCellVariants}
             className={cn(
                 "relative h-full w-full [transform-style:preserve-3d]",
                 isRevealed && "cursor-not-allowed"
@@ -61,7 +82,7 @@ function GameCell({
             >
                 {children}
             </button>
-        </div>
+        </motion.div>
     );
 }
 

@@ -16,6 +16,7 @@ export default function StartGame() {
     const {
         gameState,
         isRevealed,
+        isGenerating,
         start,
         showSuccess,
         showReady,
@@ -55,6 +56,9 @@ export default function StartGame() {
                     </h1>
                     {gameState.isIdle ? (
                         <div className="flex h-full w-full flex-col items-center justify-center">
+                            <p className="mb-8 text-lg font-semibold sm:text-3xl">
+                                Click start when you are ready!
+                            </p>
                             <Button onClick={start} size="xl" className="group">
                                 <Play className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
                                 <span>Start</span>
@@ -100,13 +104,17 @@ export default function StartGame() {
                                     "group",
                                     showSuccess ? "bg-emerald-500" : ""
                                 )}
-                                disabled={isRevealed || showSuccess}
+                                disabled={
+                                    isRevealed || isGenerating || showSuccess
+                                }
                             >
                                 <span className="flex items-center">
                                     {showSuccess ? (
                                         "Success!"
                                     ) : isRevealed ? (
-                                        "Wait..."
+                                        "Memorizing..."
+                                    ) : isGenerating ? (
+                                        "Generating..."
                                     ) : (
                                         <>
                                             <span>Confirm</span>

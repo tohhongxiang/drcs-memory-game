@@ -1,5 +1,5 @@
 import shuffle from "@/lib/shuffle";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useCountdown from "./use-countdown";
 
 function initializeCells(count: number, numberOfTargets: number) {
@@ -29,21 +29,19 @@ const levels = [
     { size: 3, target: 3 },
     { size: 3, target: 4 },
     { size: 4, target: 4 },
-    // { size: 4, target: 5 },
-    // { size: 4, target: 6 },
-    // { size: 5, target: 5 },
-    // { size: 5, target: 6 },
-    // { size: 5, target: 7 },
-    // { size: 6, target: 6 },
-    // { size: 7, target: 7 },
+    { size: 4, target: 5 },
+    { size: 4, target: 6 },
+    { size: 5, target: 5 },
+    { size: 5, target: 6 },
+    { size: 5, target: 7 },
+    { size: 6, target: 6 },
+    { size: 7, target: 7 },
 ];
 
 enum GameState {
     IDLE = "IDLE",
     STARTING = "STARTING",
     RUNNING = "RUNNING",
-    REVEALED = "REVEALED",
-    HIDDEN = "HIDDEN",
     FAILED = "FAILED",
     COMPLETE = "COMPLETE",
 }
@@ -71,8 +69,27 @@ export default function useGame({
                 setIsRevealed(false);
             },
         });
-    const startLevel = (level: number) => {
-        setLevel(level);
+
+    const [isGenerating, setIsGenerating] = useState(false);
+    const startLevel = async (newLevel: number) => {
+        setIsGenerating(true);
+        setIsRevealed(false);
+        setLevel(newLevel);
+        setCells((previousCells) =>
+            previousCells.map((c) => ({ ...c, selected: false }))
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        setCells(
+            initializeCells(
+                levels[newLevel].size * levels[newLevel].size,
+                levels[newLevel].target
+            )
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        setIsGenerating(false);
         startRevealTimer(revealTimeMs);
     };
 
@@ -103,17 +120,6 @@ export default function useGame({
         startReadyCountdown(startTimeMs - 1);
     };
 
-    useEffect(() => {
-        if (level < 0) return;
-
-        setCells(
-            initializeCells(
-                levels[level].size * levels[level].size,
-                levels[level].target
-            )
-        );
-    }, [level]);
-
     const levelUp = async () => {
         if (level === levels.length - 1) {
             setGameState(GameState.COMPLETE);
@@ -125,11 +131,11 @@ export default function useGame({
 
     const [showSuccess, setShowSuccess] = useState(false);
     const { startTimer: startSuccessTimer } = useCountdown({
-        onTimerStart: () => {
+        onTimerStart: async () => {
             setShowSuccess(true);
             setIsRevealed(true);
         },
-        onTimerEnd: () => {
+        onTimerEnd: async () => {
             setShowSuccess(false);
             setIsRevealed(false);
             levelUp();
@@ -177,6 +183,7 @@ export default function useGame({
             isCompleted: gameState === GameState.COMPLETE,
         },
         isRevealed,
+        isGenerating,
         revealTimer,
         start,
         showReady,
