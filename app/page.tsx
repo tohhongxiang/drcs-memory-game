@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export default function Home() {
-	return <main>Hello world</main>;
+    return <main className="mx-auto px-6">Hello world again</main>;
 }
