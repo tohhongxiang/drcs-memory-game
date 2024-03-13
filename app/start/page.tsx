@@ -32,14 +32,14 @@ export default function StartGame() {
         <div className="flex h-full flex-col items-center justify-center gap-4">
             {gameState.isCompleted ? (
                 <>
-                    <h1 className="mb-4 text-5xl font-bold">
+                    <h1 className="mb-4 text-3xl font-bold sm:text-5xl">
                         Congratulations!
                     </h1>
-                    <p className="mb-16 text-muted-foreground">
+                    <p className="mb-16 text-center text-lg text-muted-foreground sm:text-2xl">
                         You have completed all the levels!
                     </p>
-                    <Button onClick={reset} size="xl">
-                        <RotateCcw className="mr-4 h-8 w-8" />{" "}
+                    <Button onClick={reset} size="xl" className="group">
+                        <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
                         <span>Restart</span>
                     </Button>
                 </>
@@ -55,8 +55,8 @@ export default function StartGame() {
                     </h1>
                     {gameState.isIdle ? (
                         <div className="flex h-full w-full flex-col items-center justify-center">
-                            <Button onClick={start} size="xl">
-                                <Play className="mr-4 h-8 w-8" />{" "}
+                            <Button onClick={start} size="xl" className="group">
+                                <Play className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
                                 <span>Start</span>
                             </Button>
                         </div>
@@ -97,6 +97,7 @@ export default function StartGame() {
                                 size="xl"
                                 onClick={confirmUserSelection}
                                 className={cn(
+                                    "group",
                                     showSuccess ? "bg-emerald-500" : ""
                                 )}
                                 disabled={isRevealed || showSuccess}
@@ -109,15 +110,15 @@ export default function StartGame() {
                                     ) : (
                                         <>
                                             <span>Confirm</span>
-                                            <SendHorizonal className="ml-4 h-8 w-8" />
+                                            <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
                                         </>
                                     )}
                                 </span>
                             </Button>
                         )}
                         {gameState.isGameOver && (
-                            <Button onClick={reset} size="xl">
-                                <RotateCcw className="mr-4 h-8 w-8" />{" "}
+                            <Button onClick={reset} size="xl" className="group">
+                                <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
                                 <span>Restart</span>
                             </Button>
                         )}
