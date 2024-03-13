@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
-import { Play, RotateCcw, SendHorizonal } from "lucide-react";
+import { Play, RotateCcw, SendHorizonal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProgressTimer from "./_components/progress-timer";
 import SuccessOverlay from "./_components/success-overlay";
@@ -45,14 +45,14 @@ export default function StartGame() {
                 </>
             ) : (
                 <>
-                    <p
+                    <h1
                         className={cn(
-                            "text-3xl font-bold",
+                            "text-6xl font-bold",
                             level < 0 && "opacity-0"
                         )}
                     >
                         Level {level + 1}
-                    </p>
+                    </h1>
                     {gameState.isIdle ? (
                         <div className="flex h-full w-full flex-col items-center justify-center">
                             <Button onClick={start} size="xl">
@@ -70,7 +70,12 @@ export default function StartGame() {
                                         isTarget={isTarget}
                                         isRevealed={isRevealed}
                                         onClick={() => selectCell(id)}
-                                    />
+                                    >
+                                        {gameState.isGameOver &&
+                                            selected !== isTarget && (
+                                                <X className="h-full w-full text-red-600" />
+                                            )}
+                                    </Game.Cell>
                                 ))}
                             </Game.Board>
                             <Game.Overlay>

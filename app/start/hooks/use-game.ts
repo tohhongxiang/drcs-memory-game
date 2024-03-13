@@ -127,9 +127,11 @@ export default function useGame({
     const { startTimer: startSuccessTimer } = useCountdown({
         onTimerStart: () => {
             setShowSuccess(true);
+            setIsRevealed(true);
         },
         onTimerEnd: () => {
             setShowSuccess(false);
+            setIsRevealed(false);
             levelUp();
         },
     });

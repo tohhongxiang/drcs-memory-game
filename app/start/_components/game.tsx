@@ -34,10 +34,10 @@ interface GameCellProps
 }
 
 function GameCell({
-    id,
     selected = false,
     isTarget = false,
     isRevealed = true,
+    children,
     ...props
 }: GameCellProps) {
     return (
@@ -50,7 +50,7 @@ function GameCell({
             <button
                 {...props}
                 className={cn(
-                    "absolute inset-0 box-border h-full w-full rounded-md border-4 border-gray-300 border-transparent bg-blue-400 transition duration-150",
+                    "absolute inset-0 box-border flex h-full w-full items-center justify-center rounded-md border-4 border-gray-300 border-transparent bg-blue-400 transition duration-150",
                     isTarget &&
                         isRevealed &&
                         "bg-green-400 [transform:rotateX(180deg)]",
@@ -59,7 +59,7 @@ function GameCell({
                     selected && "scale-95 border-red-400 hover:scale-100"
                 )}
             >
-                {id}
+                {children}
             </button>
         </div>
     );
