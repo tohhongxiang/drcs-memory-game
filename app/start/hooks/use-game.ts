@@ -1,24 +1,5 @@
+import shuffle from "@/lib/shuffle";
 import { useEffect, useState } from "react";
-
-function shuffle<T>(array: T[]) {
-    let currentIndex = array.length,
-        randomIndex;
-
-    // While there remain elements to shuffle.
-    while (currentIndex > 0) {
-        // Pick a remaining element.
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        // And swap it with the current element.
-        [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex],
-            array[currentIndex],
-        ];
-    }
-
-    return array;
-}
 
 function initializeCells(count: number, numberOfTargets: number) {
     if (numberOfTargets > count) {
@@ -43,11 +24,73 @@ function initializeCells(count: number, numberOfTargets: number) {
     return cells;
 }
 
-export default function useGame() {
-    const [size, setSize] = useState(3);
-    const [isRevealed, setIsRevealed] = useState(true);
+function sleep(timeMs: number) {
+    return new Promise((r) => setTimeout(r, timeMs));
+}
 
-    const [cells, setCells] = useState(initializeCells(size * size, 0));
+const levels = [
+    { size: 3, target: 3 },
+    { size: 3, target: 4 },
+    { size: 4, target: 4 },
+    { size: 4, target: 5 },
+    { size: 4, target: 6 },
+    { size: 5, target: 5 },
+    { size: 5, target: 6 },
+    { size: 5, target: 7 },
+    { size: 6, target: 6 },
+    { size: 7, target: 7 },
+];
+
+enum GameState {
+    IDLE = "IDLE",
+    STARTING = "STARTING",
+    RUNNING = "RUNNING",
+    REVEALED = "REVEALED",
+    HIDDEN = "HIDDEN",
+    FAILED = "FAILED",
+    COMPLETE = "COMPLETE",
+}
+
+const revealTime = 1000;
+
+export default function useGame() {
+    const [gameState, setGameState] = useState(GameState.IDLE);
+    const [isRevealed, setIsRevealed] = useState(false);
+
+    const [level, setLevel] = useState(-1);
+    const [cells, setCells] = useState(
+        initializeCells(levels[0].size * levels[0].size, 0)
+    );
+
+    const [showReady, setShowReady] = useState(false);
+    const start = async () => {
+        setCells(
+            initializeCells(levels[0].size * levels[0].size, levels[0].target)
+        );
+        setGameState(GameState.STARTING);
+
+        setShowReady(true);
+        await sleep(revealTime);
+        setShowReady(false);
+
+        setGameState(GameState.RUNNING);
+        setIsRevealed(true);
+        setLevel(0);
+
+        await sleep(revealTime);
+        setIsRevealed(false);
+    };
+
+    useEffect(() => {
+        if (level < 0) return;
+
+        setCells(
+            initializeCells(
+                levels[level].size * levels[level].size,
+                levels[level].target
+            )
+        );
+    }, [level]);
 
     const selectCell = (id: number) => {
         setCells((previousCells) =>
@@ -61,20 +104,62 @@ export default function useGame() {
         return cells.every((cell) => cell.selected === cell.isTarget);
     };
 
-    const deselectAllCells = () =>
-        setCells((c) => c.map((c) => ({ ...c, selected: false })));
+    const confirmUserSelection = () => {
+        const succeeded = validateSelected();
 
-    useEffect(() => {
-        setCells(initializeCells(size * size, size));
-    }, [size]);
+        if (succeeded) {
+            levelUp();
+        } else {
+            gameOver();
+        }
+    };
+
+    const [showSuccess, setShowSuccess] = useState(false);
+    const levelUp = async () => {
+        setIsRevealed(true);
+        setShowSuccess(true);
+        await sleep(revealTime);
+        setShowSuccess(false);
+
+        if (level >= levels.length - 1) {
+            setGameState(GameState.COMPLETE);
+            return;
+        }
+
+        setLevel((c) => c + 1);
+
+        await sleep(revealTime);
+        setIsRevealed(false);
+    };
+
+    const gameOver = () => {
+        setIsRevealed(true);
+        setGameState(GameState.FAILED);
+    };
+
+    const reset = () => {
+        setGameState(GameState.IDLE);
+        setLevel(-1);
+        setCells(initializeCells(levels[0].size * levels[0].size, 0));
+        setIsRevealed(false);
+    };
 
     return {
-        cells,
-        setSize,
+        gameState: {
+            isStarting: gameState === GameState.STARTING,
+            isIdle: gameState === GameState.IDLE,
+            isRunning: gameState === GameState.RUNNING,
+            isGameOver: gameState === GameState.FAILED,
+            isCompleted: gameState === GameState.COMPLETE,
+        },
         isRevealed,
-        setIsRevealed,
+        start,
+        showReady,
+        showSuccess,
+        level,
+        reset,
+        cells,
         selectCell,
-        validateSelected,
-        deselectAllCells,
+        confirmUserSelection,
     };
 }

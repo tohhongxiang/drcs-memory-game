@@ -37,17 +37,27 @@ function GameCell({
     ...props
 }: GameCellProps) {
     return (
-        <button
-            {...props}
+        <div
             className={cn(
-                "box-border h-full w-full rounded-md border-4 border-gray-300 border-transparent bg-blue-400 transition duration-75",
-                isTarget && isRevealed && "bg-green-400",
-                !selected && "hover:scale-105",
-                selected && "scale-95 border-red-400 hover:scale-100"
+                "relative h-full w-full [transform-style:preserve-3d]",
+                isRevealed && "cursor-not-allowed"
             )}
         >
-            {id}
-        </button>
+            <button
+                {...props}
+                className={cn(
+                    "absolute inset-0 box-border h-full w-full rounded-md border-4 border-gray-300 border-transparent bg-blue-400 transition duration-150",
+                    isTarget &&
+                        isRevealed &&
+                        "bg-green-400 [transform:rotateX(180deg)]",
+                    isRevealed && "pointer-events-none",
+                    !selected && "hover:scale-105",
+                    selected && "scale-95 border-red-400 hover:scale-100"
+                )}
+            >
+                {id}
+            </button>
+        </div>
     );
 }
 

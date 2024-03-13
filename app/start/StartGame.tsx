@@ -1,16 +1,15 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
-import { Check, Play, RotateCcw, SendHorizonal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 export default function StartGame() {
     const {
         gameState,
         isRevealed,
         start,
+        showReady,
         showSuccess,
         level,
         reset,
@@ -49,60 +48,43 @@ export default function StartGame() {
                                 <Check className="h-48 w-48" />
                             </div>
                         )}
-                        {gameState.isIdle ? (
-                            <div className="absolute left-1/2 top-1/2 z-10 flex w-full -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                                <Button onClick={start} size="xl">
-                                    <Play className="mr-4 h-8 w-8" />{" "}
-                                    <span>Start</span>
-                                </Button>
+                        {showReady && (
+                            <div className="absolute left-1/2 top-1/2 z-10 w-full -translate-x-1/2 -translate-y-1/2">
+                                <p className="mx-8 rounded-lg bg-slate-200/70 p-8 text-center text-3xl font-bold shadow-lg backdrop-blur">
+                                    Ready!
+                                </p>
                             </div>
-                        ) : (
-                            <Game>
-                                {cells.map(({ id, selected, isTarget }) => (
-                                    <Game.Cell
-                                        key={id}
-                                        selected={selected}
-                                        isTarget={isTarget}
-                                        isRevealed={isRevealed}
-                                        onClick={() => selectCell(id)}
-                                    />
-                                ))}
-                            </Game>
                         )}
+                        <Game>
+                            {cells.map(({ id, selected, isTarget }) => (
+                                <Game.Cell
+                                    key={id}
+                                    selected={selected}
+                                    isTarget={isTarget}
+                                    isRevealed={isRevealed}
+                                    onClick={() => selectCell(id)}
+                                />
+                            ))}
+                        </Game>
                     </div>
                     <div className="flex items-center justify-center gap-4">
-                        {gameState.isStarting && (
-                            <Button disabled size="xl">
-                                Starting...
+                        {gameState.isIdle && (
+                            <Button onClick={start} size="lg">
+                                Start
                             </Button>
                         )}
                         {gameState.isRunning && (
                             <Button
-                                size="xl"
+                                size="lg"
                                 onClick={confirmUserSelection}
-                                className={cn(
-                                    showSuccess ? "bg-emerald-500" : ""
-                                )}
-                                disabled={isRevealed || showSuccess}
+                                disabled={isRevealed}
                             >
-                                <span className="flex items-center">
-                                    {showSuccess ? (
-                                        "Success!"
-                                    ) : isRevealed ? (
-                                        "Wait..."
-                                    ) : (
-                                        <>
-                                            <span>Confirm</span>
-                                            <SendHorizonal className="ml-4 h-8 w-8" />
-                                        </>
-                                    )}
-                                </span>
+                                Confirm
                             </Button>
                         )}
                         {gameState.isGameOver && (
-                            <Button onClick={reset} size="xl">
-                                <RotateCcw className="mr-4 h-8 w-8" />{" "}
-                                <span>Restart</span>
+                            <Button size="lg" onClick={reset}>
+                                Restart
                             </Button>
                         )}
                     </div>
