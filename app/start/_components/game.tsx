@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export default function Game({ children }: { children: React.ReactNode[] }) {
     return (
-        <div className="relative h-[80vw] w-[80vw] lg:h-[50vw] lg:w-[50vw] xl:h-[40vw] xl:w-[40vw]">
+        <div className="relative h-[80vw] w-[80vw] md:h-[70vw] md:w-[70vw] lg:h-[50vw] lg:w-[50vw] xl:h-[40vw] xl:w-[40vw]">
             {children}
         </div>
     );

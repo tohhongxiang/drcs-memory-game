@@ -9,6 +9,9 @@ import ProgressTimer from "./_components/progress-timer";
 import SuccessOverlay from "./_components/success-overlay";
 import ReadyOverlay from "./_components/ready-overlay";
 
+const START_TIME = 4000;
+const REVEAL_TIME = 1000;
+
 export default function StartGame() {
     const {
         gameState,
@@ -23,7 +26,7 @@ export default function StartGame() {
         selectCell,
         confirmUserSelection,
         revealTimer,
-    } = useGame(4000, 1000);
+    } = useGame({ startTimeMs: START_TIME, revealTimeMs: REVEAL_TIME });
 
     return (
         <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -82,7 +85,7 @@ export default function StartGame() {
                             </Game.Overlay>
                         </Game>
                     )}
-                    <ProgressTimer progress={revealTimer / 1000} />
+                    <ProgressTimer progress={revealTimer / REVEAL_TIME} />
                     <div className="flex w-full flex-col items-center justify-center gap-4">
                         {gameState.isRunning && (
                             <Button

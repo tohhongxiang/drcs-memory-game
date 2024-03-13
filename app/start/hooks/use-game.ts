@@ -48,7 +48,13 @@ enum GameState {
     COMPLETE = "COMPLETE",
 }
 
-export default function useGame(startTimeMs: number, revealTimeMs: number) {
+export default function useGame({
+    startTimeMs,
+    revealTimeMs,
+}: {
+    startTimeMs: number;
+    revealTimeMs: number;
+}) {
     const [gameState, setGameState] = useState(GameState.IDLE);
     const [level, setLevel] = useState(-1);
     const [cells, setCells] = useState(
