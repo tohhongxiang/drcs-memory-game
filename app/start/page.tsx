@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
-import { Check, Play, RotateCcw, SendHorizonal } from "lucide-react";
+import { Play, RotateCcw, SendHorizonal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ProgressTimer from "./_components/progress-timer";
+import SuccessOverlay from "./_components/success-overlay";
+import ReadyOverlay from "./_components/ready-overlay";
 
 export default function StartGame() {
     const {
@@ -12,12 +15,15 @@ export default function StartGame() {
         isRevealed,
         start,
         showSuccess,
+        showReady,
+        readyCountdownTimeMs,
         level,
         reset,
         cells,
         selectCell,
         confirmUserSelection,
-    } = useGame();
+        revealTimer,
+    } = useGame(4000, 1000);
 
     return (
         <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -29,8 +35,9 @@ export default function StartGame() {
                     <p className="mb-16 text-muted-foreground">
                         You have completed all the levels!
                     </p>
-                    <Button size="lg" onClick={reset}>
-                        Restart
+                    <Button onClick={reset} size="xl">
+                        <RotateCcw className="mr-4 h-8 w-8" />{" "}
+                        <span>Restart</span>
                     </Button>
                 </>
             ) : (
@@ -43,21 +50,16 @@ export default function StartGame() {
                     >
                         Level {level + 1}
                     </p>
-                    <div className="relative h-[80vw] w-[80vw] lg:h-[50vw] lg:w-[50vw] xl:h-[40vw] xl:w-[40vw]">
-                        {showSuccess && (
-                            <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border-8 border-emerald-800 bg-emerald-400/90 p-8 shadow-lg backdrop-blur-sm">
-                                <Check className="h-48 w-48" />
-                            </div>
-                        )}
-                        {gameState.isIdle ? (
-                            <div className="absolute left-1/2 top-1/2 z-10 flex w-full -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                                <Button onClick={start} size="xl">
-                                    <Play className="mr-4 h-8 w-8" />{" "}
-                                    <span>Start</span>
-                                </Button>
-                            </div>
-                        ) : (
-                            <Game>
+                    {gameState.isIdle ? (
+                        <div className="flex h-full w-full flex-col items-center justify-center">
+                            <Button onClick={start} size="xl">
+                                <Play className="mr-4 h-8 w-8" />{" "}
+                                <span>Start</span>
+                            </Button>
+                        </div>
+                    ) : (
+                        <Game>
+                            <Game.Board>
                                 {cells.map(({ id, selected, isTarget }) => (
                                     <Game.Cell
                                         key={id}
@@ -67,15 +69,21 @@ export default function StartGame() {
                                         onClick={() => selectCell(id)}
                                     />
                                 ))}
-                            </Game>
-                        )}
-                    </div>
-                    <div className="flex items-center justify-center gap-4">
-                        {gameState.isStarting && (
-                            <Button disabled size="xl">
-                                Starting...
-                            </Button>
-                        )}
+                            </Game.Board>
+                            <Game.Overlay>
+                                {showSuccess ? <SuccessOverlay /> : null}
+                                {showReady ? (
+                                    <ReadyOverlay
+                                        readyCountdownTimeMs={
+                                            readyCountdownTimeMs
+                                        }
+                                    />
+                                ) : null}
+                            </Game.Overlay>
+                        </Game>
+                    )}
+                    <ProgressTimer progress={revealTimer / 1000} />
+                    <div className="flex w-full flex-col items-center justify-center gap-4">
                         {gameState.isRunning && (
                             <Button
                                 size="xl"

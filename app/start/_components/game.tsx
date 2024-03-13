@@ -2,11 +2,15 @@
 
 import { cn } from "@/lib/utils";
 
-interface GameProps {
-    children: React.ReactNode[];
+export default function Game({ children }: { children: React.ReactNode[] }) {
+    return (
+        <div className="relative h-[80vw] w-[80vw] lg:h-[50vw] lg:w-[50vw] xl:h-[40vw] xl:w-[40vw]">
+            {children}
+        </div>
+    );
 }
 
-export default function Game({ children }: GameProps) {
+function GameBoard({ children }: { children: React.ReactNode[] }) {
     return (
         <div
             style={{
@@ -61,4 +65,20 @@ function GameCell({
     );
 }
 
+function GameOverlay({ children }: { children: React.ReactNode }) {
+    if (
+        !children ||
+        (children instanceof Array && children.every((child) => !child))
+    )
+        return null;
+
+    return (
+        <div className="absolute left-1/2 top-1/2 z-10 flex h-full w-full -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+            {children}
+        </div>
+    );
+}
+
+Game.Overlay = GameOverlay;
+Game.Board = GameBoard;
 Game.Cell = GameCell;

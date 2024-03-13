@@ -1,5 +1,6 @@
 import shuffle from "@/lib/shuffle";
 import { useEffect, useState } from "react";
+import useCountdown from "./use-countdown";
 
 function initializeCells(count: number, numberOfTargets: number) {
     if (numberOfTargets > count) {
@@ -24,21 +25,17 @@ function initializeCells(count: number, numberOfTargets: number) {
     return cells;
 }
 
-function sleep(timeMs: number) {
-    return new Promise((r) => setTimeout(r, timeMs));
-}
-
 const levels = [
     { size: 3, target: 3 },
     { size: 3, target: 4 },
     { size: 4, target: 4 },
-    { size: 4, target: 5 },
-    { size: 4, target: 6 },
-    { size: 5, target: 5 },
-    { size: 5, target: 6 },
-    { size: 5, target: 7 },
-    { size: 6, target: 6 },
-    { size: 7, target: 7 },
+    // { size: 4, target: 5 },
+    // { size: 4, target: 6 },
+    // { size: 5, target: 5 },
+    // { size: 5, target: 6 },
+    // { size: 5, target: 7 },
+    // { size: 6, target: 6 },
+    // { size: 7, target: 7 },
 ];
 
 enum GameState {
@@ -51,34 +48,53 @@ enum GameState {
     COMPLETE = "COMPLETE",
 }
 
-const revealTime = 1000;
-
-export default function useGame() {
+export default function useGame(startTimeMs: number, revealTimeMs: number) {
     const [gameState, setGameState] = useState(GameState.IDLE);
-    const [isRevealed, setIsRevealed] = useState(false);
-
     const [level, setLevel] = useState(-1);
     const [cells, setCells] = useState(
         initializeCells(levels[0].size * levels[0].size, 0)
     );
 
+    const [isRevealed, setIsRevealed] = useState(false);
+    const { msRemaining: revealTimer, startTimer: startRevealTimer } =
+        useCountdown({
+            onTimerStart: () => {
+                setIsRevealed(true);
+            },
+            onTimerEnd: () => {
+                setIsRevealed(false);
+            },
+        });
+    const startLevel = (level: number) => {
+        setLevel(level);
+        startRevealTimer(revealTimeMs);
+    };
+
     const [showReady, setShowReady] = useState(false);
+    const {
+        msRemaining: readyCountdownTimeMs,
+        startTimer: startReadyCountdown,
+    } = useCountdown({
+        onTimerStart: () => {
+            setCells(
+                initializeCells(
+                    levels[0].size * levels[0].size,
+                    levels[0].target
+                )
+            );
+            setGameState(GameState.STARTING);
+            setShowReady(true);
+        },
+        onTimerEnd: async () => {
+            setShowReady(false);
+
+            setGameState(GameState.RUNNING);
+            startLevel(0);
+        },
+    });
+
     const start = async () => {
-        setCells(
-            initializeCells(levels[0].size * levels[0].size, levels[0].target)
-        );
-        setGameState(GameState.STARTING);
-
-        setShowReady(true);
-        await sleep(revealTime);
-        setShowReady(false);
-
-        setGameState(GameState.RUNNING);
-        setIsRevealed(true);
-        setLevel(0);
-
-        await sleep(revealTime);
-        setIsRevealed(false);
+        startReadyCountdown(startTimeMs - 1);
     };
 
     useEffect(() => {
@@ -92,6 +108,26 @@ export default function useGame() {
         );
     }, [level]);
 
+    const levelUp = async () => {
+        if (level === levels.length - 1) {
+            setGameState(GameState.COMPLETE);
+            return;
+        }
+
+        startLevel(level + 1);
+    };
+
+    const [showSuccess, setShowSuccess] = useState(false);
+    const { startTimer: startSuccessTimer } = useCountdown({
+        onTimerStart: () => {
+            setShowSuccess(true);
+        },
+        onTimerEnd: () => {
+            setShowSuccess(false);
+            levelUp();
+        },
+    });
+
     const selectCell = (id: number) => {
         setCells((previousCells) =>
             previousCells.map((cell) =>
@@ -100,36 +136,16 @@ export default function useGame() {
         );
     };
 
-    const validateSelected = () => {
-        return cells.every((cell) => cell.selected === cell.isTarget);
-    };
-
     const confirmUserSelection = () => {
-        const succeeded = validateSelected();
+        const succeeded = cells.every(
+            (cell) => cell.selected === cell.isTarget
+        );
 
         if (succeeded) {
-            levelUp();
+            startSuccessTimer(revealTimeMs);
         } else {
             gameOver();
         }
-    };
-
-    const [showSuccess, setShowSuccess] = useState(false);
-    const levelUp = async () => {
-        setIsRevealed(true);
-        setShowSuccess(true);
-        await sleep(revealTime);
-        setShowSuccess(false);
-
-        if (level >= levels.length - 1) {
-            setGameState(GameState.COMPLETE);
-            return;
-        }
-
-        setLevel((c) => c + 1);
-
-        await sleep(revealTime);
-        setIsRevealed(false);
     };
 
     const gameOver = () => {
@@ -153,8 +169,10 @@ export default function useGame() {
             isCompleted: gameState === GameState.COMPLETE,
         },
         isRevealed,
+        revealTimer,
         start,
         showReady,
+        readyCountdownTimeMs,
         showSuccess,
         level,
         reset,
