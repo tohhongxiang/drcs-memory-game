@@ -45,6 +45,7 @@ interface GameCellProps
     selected?: boolean;
     isTarget?: boolean;
     isRevealed?: boolean;
+    canClick?: boolean;
 }
 
 const gameCellVariants = {
@@ -56,6 +57,7 @@ function GameCell({
     selected = false,
     isTarget = false,
     isRevealed = true,
+    canClick = true,
     children,
     ...props
 }: GameCellProps) {
@@ -65,7 +67,7 @@ function GameCell({
             variants={gameCellVariants}
             className={cn(
                 "relative h-full w-full [transform-style:preserve-3d]",
-                isRevealed && "cursor-not-allowed"
+                !canClick && "cursor-not-allowed"
             )}
         >
             <button
@@ -75,7 +77,7 @@ function GameCell({
                     isTarget &&
                         isRevealed &&
                         "bg-green-400 [transform:rotateX(180deg)]",
-                    isRevealed && "pointer-events-none",
+                    !canClick && "pointer-events-none",
                     !selected && "hover:scale-105",
                     selected && "scale-95 border-red-400 hover:scale-100"
                 )}

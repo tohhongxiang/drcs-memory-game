@@ -1,48 +1,29 @@
-import shuffle from "@/lib/shuffle";
 import { useState } from "react";
 import useCountdown from "./use-countdown";
 import useSound from "use-sound";
-
-function initializeCells(count: number, numberOfTargets: number) {
-    if (numberOfTargets > count) {
-        throw new Error(
-            "Number of targets should be less than the number of cells"
-        );
-    }
-
-    const cells = [...Array(count)].map((_, index) => ({
-        id: index,
-        selected: false,
-        isTarget: false,
-    }));
-
-    const targets = shuffle(Array.from(Array(count).keys())).slice(
-        0,
-        numberOfTargets
-    );
-
-    targets.forEach((target) => (cells[target].isTarget = true));
-
-    return cells;
-}
+import useLevelState from "./use-level-state";
 
 const levels = [
-    { size: 3, target: 3 },
-    { size: 3, target: 4 },
-    { size: 4, target: 4 },
-    { size: 4, target: 5 },
-    { size: 4, target: 6 },
-    { size: 5, target: 5 },
-    { size: 5, target: 6 },
-    { size: 5, target: 7 },
-    { size: 6, target: 6 },
-    { size: 7, target: 7 },
+    { size: 3, targets: 3 },
+    { size: 3, targets: 4 },
+    { size: 4, targets: 4 },
+    { size: 4, targets: 5 },
+    { size: 4, targets: 6 },
+    { size: 5, targets: 5 },
+    { size: 5, targets: 6 },
+    { size: 5, targets: 7 },
+    { size: 6, targets: 6 },
+    { size: 7, targets: 7 },
 ];
 
 enum GameState {
     IDLE = "IDLE",
     STARTING = "STARTING",
     RUNNING = "RUNNING",
+    WAITING_FOR_USER = "WAITING_FOR_USER",
+    SHOW_SUCCESS = "SHOW_SUCCESS",
+    GENERATING = "GENERATING",
+    REVEALED = "REVEALED",
     FAILED = "FAILED",
     COMPLETE = "COMPLETE",
 }
@@ -55,58 +36,43 @@ export default function useGame({
     revealTimeMs: number;
 }) {
     const [gameState, setGameState] = useState(GameState.IDLE);
-    const [level, setLevel] = useState(-1);
-    const [cells, setCells] = useState(
-        initializeCells(levels[0].size * levels[0].size, 0)
-    );
+    const { cells, level, deselectAll, initializeLevel, selectCell } =
+        useLevelState(levels);
 
     const [playReveal] = useSound("./reveal.mp3");
     const [playGo] = useSound("./go.mp3");
 
-    const [isRevealed, setIsRevealed] = useState(false);
     const {
-        msRemaining: revealTimer,
+        msRemaining: revealCountdownTimeMs,
         startTimer: startRevealTimer,
         resetTimer: resetRevealTimer,
     } = useCountdown({
         timeMs: revealTimeMs,
         onTimerStart() {
-            setIsRevealed(true);
+            setGameState(GameState.REVEALED);
             playReveal();
         },
         onTimerEnd() {
-            setIsRevealed(false);
+            setGameState(GameState.WAITING_FOR_USER);
             playGo();
         },
     });
 
-    const [isGenerating, setIsGenerating] = useState(false);
-    const startLevel = async (newLevel: number) => {
-        setIsGenerating(true);
-
-        setIsRevealed(false);
-        setLevel(newLevel);
-        setCells((previousCells) =>
-            previousCells.map((c) => ({ ...c, selected: false }))
-        );
+    const beginLevel = async (newLevel: number) => {
+        setGameState(GameState.GENERATING);
+        deselectAll();
 
         resetRevealTimer();
 
         await new Promise((resolve) => setTimeout(resolve, 400));
 
-        setCells(
-            initializeCells(
-                levels[newLevel].size * levels[newLevel].size,
-                levels[newLevel].target
-            )
-        );
+        initializeLevel(newLevel);
 
         await new Promise((resolve) => setTimeout(resolve, 700));
-        setIsGenerating(false);
+        setGameState(GameState.IDLE);
         startRevealTimer();
     };
 
-    const [showReady, setShowReady] = useState(false);
     const {
         msRemaining: readyCountdownTimeMs,
         startTimer: startReadyCountdown,
@@ -114,20 +80,11 @@ export default function useGame({
         timeMs: startTimeMs,
         intervalMs: 1000,
         onTimerStart() {
-            setCells(
-                initializeCells(
-                    levels[0].size * levels[0].size,
-                    levels[0].target
-                )
-            );
             setGameState(GameState.STARTING);
-            setShowReady(true);
         },
         async onTimerEnd() {
-            setShowReady(false);
-
             setGameState(GameState.RUNNING);
-            startLevel(0);
+            beginLevel(0);
         },
     });
 
@@ -141,19 +98,16 @@ export default function useGame({
             return;
         }
 
-        startLevel(level + 1);
+        beginLevel(level + 1);
     };
 
-    const [showSuccess, setShowSuccess] = useState(false);
     const { startTimer: startSuccessTimer } = useCountdown({
         timeMs: revealTimeMs,
         onTimerStart() {
-            setShowSuccess(true);
-            setIsRevealed(true);
+            setGameState(GameState.SHOW_SUCCESS);
         },
         onTimerEnd() {
-            setShowSuccess(false);
-            setIsRevealed(false);
+            setGameState(GameState.IDLE);
             levelUp();
         },
     });
@@ -162,13 +116,9 @@ export default function useGame({
         playbackRate: 0.75 + cells.filter((c) => c.selected).length * 0.16,
     });
 
-    const selectCell = (id: number) => {
+    const handleSelectCell = (id: number) => {
         playSelect();
-        setCells((previousCells) =>
-            previousCells.map((cell) =>
-                cell.id === id ? { ...cell, selected: !cell.selected } : cell
-            )
-        );
+        selectCell(id);
     };
 
     const [playCorrect] = useSound("./correct.mp3");
@@ -189,15 +139,12 @@ export default function useGame({
     };
 
     const gameOver = () => {
-        setIsRevealed(true);
         setGameState(GameState.FAILED);
     };
 
     const reset = () => {
         setGameState(GameState.IDLE);
-        setLevel(-1);
-        setCells(initializeCells(levels[0].size * levels[0].size, 0));
-        setIsRevealed(false);
+        initializeLevel(0);
     };
 
     return {
@@ -206,19 +153,24 @@ export default function useGame({
             isIdle: gameState === GameState.IDLE,
             isRunning: gameState === GameState.RUNNING,
             isGameOver: gameState === GameState.FAILED,
+            isWaitingUserInput: gameState === GameState.WAITING_FOR_USER,
             isCompleted: gameState === GameState.COMPLETE,
+            isRevealed:
+                gameState === GameState.REVEALED ||
+                gameState === GameState.FAILED ||
+                gameState === GameState.SHOW_SUCCESS,
+            isGenerating: gameState === GameState.GENERATING,
+            isShowingSuccess: gameState === GameState.SHOW_SUCCESS,
         },
-        isRevealed,
-        isGenerating,
-        revealTimer,
-        start,
-        showReady,
+        levelInfo: {
+            level,
+            cells,
+        },
+        revealCountdownTimeMs,
         readyCountdownTimeMs,
-        showSuccess,
-        level,
+        start,
         reset,
-        cells,
-        selectCell,
+        selectCell: handleSelectCell,
         confirmUserSelection,
     };
 }

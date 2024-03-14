@@ -15,18 +15,13 @@ const REVEAL_TIME = 1000;
 export default function StartGame() {
     const {
         gameState,
-        isRevealed,
-        isGenerating,
-        start,
-        showSuccess,
-        showReady,
         readyCountdownTimeMs,
-        level,
+        revealCountdownTimeMs,
+        levelInfo: { level, cells },
+        start,
         reset,
-        cells,
         selectCell,
         confirmUserSelection,
-        revealTimer,
     } = useGame({ startTimeMs: START_TIME, revealTimeMs: REVEAL_TIME });
 
     return (
@@ -46,14 +41,6 @@ export default function StartGame() {
                 </>
             ) : (
                 <>
-                    <h1
-                        className={cn(
-                            "text-6xl font-bold",
-                            level < 0 && "opacity-0"
-                        )}
-                    >
-                        Level {level + 1}
-                    </h1>
                     {gameState.isIdle ? (
                         <div className="flex h-full w-full flex-col items-center justify-center">
                             <p className="mb-8 text-lg font-semibold sm:text-3xl">
@@ -66,6 +53,14 @@ export default function StartGame() {
                         </div>
                     ) : (
                         <>
+                            <h1
+                                className={cn(
+                                    "text-6xl font-bold",
+                                    level < 0 && "opacity-0"
+                                )}
+                            >
+                                Level {level + 1}
+                            </h1>
                             <Game>
                                 <Game.Board>
                                     {cells.map(({ id, selected, isTarget }) => (
@@ -73,7 +68,10 @@ export default function StartGame() {
                                             key={id}
                                             selected={selected}
                                             isTarget={isTarget}
-                                            isRevealed={isRevealed}
+                                            isRevealed={gameState.isRevealed}
+                                            canClick={
+                                                gameState.isWaitingUserInput
+                                            }
                                             onClick={() => selectCell(id)}
                                         >
                                             {gameState.isGameOver &&
@@ -84,8 +82,10 @@ export default function StartGame() {
                                     ))}
                                 </Game.Board>
                                 <Game.Overlay>
-                                    {showSuccess ? <SuccessOverlay /> : null}
-                                    {showReady ? (
+                                    {gameState.isShowingSuccess ? (
+                                        <SuccessOverlay />
+                                    ) : null}
+                                    {gameState.isStarting ? (
                                         <ReadyOverlay
                                             readyCountdownTimeMs={
                                                 readyCountdownTimeMs
@@ -95,7 +95,7 @@ export default function StartGame() {
                                 </Game.Overlay>
                             </Game>
                             <ProgressTimer
-                                progress={revealTimer / REVEAL_TIME}
+                                progress={revealCountdownTimeMs / REVEAL_TIME}
                             />
                             {gameState.isGameOver ? (
                                 <Button
@@ -106,37 +106,30 @@ export default function StartGame() {
                                     <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
                                     <span>Restart</span>
                                 </Button>
-                            ) : (
+                            ) : gameState.isWaitingUserInput ? (
                                 <Button
                                     size="xl"
                                     onClick={confirmUserSelection}
-                                    className={cn(
-                                        "group",
-                                        showSuccess ? "bg-emerald-500" : ""
-                                    )}
-                                    disabled={
-                                        isRevealed ||
-                                        isGenerating ||
-                                        showSuccess ||
-                                        gameState.isStarting
-                                    }
+                                    className="group flex items-center"
                                 >
-                                    <span className="flex items-center">
-                                        {showSuccess ? (
-                                            "Success!"
-                                        ) : isRevealed ? (
-                                            "Memorizing..."
-                                        ) : isGenerating ? (
-                                            "Generating..."
-                                        ) : gameState.isStarting ? (
-                                            "Starting..."
-                                        ) : (
-                                            <>
-                                                <span>Confirm</span>
-                                                <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
-                                            </>
-                                        )}
-                                    </span>
+                                    <span>Confirm</span>
+                                    <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
+                                </Button>
+                            ) : gameState.isShowingSuccess ? (
+                                <Button
+                                    size="xl"
+                                    className="group bg-emerald-500"
+                                    disabled
+                                >
+                                    Success!
+                                </Button>
+                            ) : (
+                                <Button size="xl" className="group" disabled>
+                                    {gameState.isRevealed
+                                        ? "Memorizing..."
+                                        : gameState.isGenerating
+                                          ? "Generating..."
+                                          : "Starting..."}
                                 </Button>
                             )}
                         </>
