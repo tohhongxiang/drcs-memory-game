@@ -12,14 +12,20 @@ type Level = {
     targets: number;
 };
 
+const MAX_TARGETS = 30;
+
 export default function useLevelState(levels: Level[]) {
     const [level, setLevel] = useState(0);
-    const [cells, setCells] = useState<Cell[]>(
-        initializeCells(
-            levels[level].size * levels[level].size,
-            levels[level].targets
-        )
-    );
+    const [cells, setCells] = useState<Cell[]>(() => {
+        if (level < levels.length) {
+            return initializeCells(
+                levels[level].size * levels[level].size,
+                levels[level].targets
+            );
+        }
+
+        return [];
+    });
 
     const selectCell = (id: number) => {
         setCells((previousCells) =>
@@ -37,10 +43,27 @@ export default function useLevelState(levels: Level[]) {
 
     const initializeLevel = (level: number) => {
         setLevel(level);
+
+        if (level < levels.length) {
+            setCells(
+                initializeCells(
+                    levels[level].size * levels[level].size,
+                    levels[level].targets
+                )
+            );
+        } else {
+            handleInfiniteLevelGeneration();
+        }
+    };
+
+    const handleInfiniteLevelGeneration = () => {
+        const levelSize = cells.length;
+        const targets = cells.filter((cell) => cell.isTarget).length;
+
         setCells(
             initializeCells(
-                levels[level].size * levels[level].size,
-                levels[level].targets
+                levelSize,
+                Math.min(targets + 1, MAX_TARGETS, levelSize)
             )
         );
     };

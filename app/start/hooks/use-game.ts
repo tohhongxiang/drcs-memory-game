@@ -84,7 +84,7 @@ export default function useGame({
         },
         async onTimerEnd() {
             setGameState(GameState.RUNNING);
-            beginLevel(0);
+            beginLevel(level);
         },
     });
 
@@ -92,12 +92,15 @@ export default function useGame({
         startReadyCountdown();
     };
 
+    const [hasCompletedGame, setHasCompletedGame] = useState(false);
     const levelUp = async () => {
-        if (level === levels.length - 1) {
+        if (level === levels.length - 1 && !hasCompletedGame) {
+            setHasCompletedGame(true);
             setGameState(GameState.COMPLETE);
             return;
         }
 
+        setGameState(GameState.GENERATING);
         beginLevel(level + 1);
     };
 
@@ -107,7 +110,6 @@ export default function useGame({
             setGameState(GameState.SHOW_SUCCESS);
         },
         onTimerEnd() {
-            setGameState(GameState.IDLE);
             levelUp();
         },
     });
@@ -143,8 +145,14 @@ export default function useGame({
     };
 
     const reset = () => {
+        setHasCompletedGame(false);
         setGameState(GameState.IDLE);
         initializeLevel(0);
+    };
+
+    const continueGame = () => {
+        initializeLevel(level + 1);
+        startReadyCountdown();
     };
 
     return {
@@ -161,6 +169,7 @@ export default function useGame({
                 gameState === GameState.SHOW_SUCCESS,
             isGenerating: gameState === GameState.GENERATING,
             isShowingSuccess: gameState === GameState.SHOW_SUCCESS,
+            hasCompletedGame,
         },
         levelInfo: {
             level,
@@ -170,6 +179,7 @@ export default function useGame({
         readyCountdownTimeMs,
         start,
         reset,
+        continueGame,
         selectCell: handleSelectCell,
         confirmUserSelection,
     };

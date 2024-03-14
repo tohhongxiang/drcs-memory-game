@@ -7,6 +7,7 @@ import {
     Play,
     RotateCcw,
     SendHorizonal,
+    StepForward,
     Volume2,
     VolumeX,
     X,
@@ -38,6 +39,7 @@ function GameUI() {
         levelInfo: { level, cells },
         start,
         reset,
+        continueGame,
         selectCell,
         confirmUserSelection,
     } = useGame({ startTimeMs: START_TIME, revealTimeMs: REVEAL_TIME });
@@ -66,16 +68,31 @@ function GameUI() {
                     <p className="mb-16 text-center text-lg text-muted-foreground sm:text-2xl">
                         You have completed all the levels!
                     </p>
-                    <Button onClick={reset} size="xl" className="group">
-                        <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
-                        <span>Restart</span>
-                    </Button>
+                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                        <Button
+                            onClick={reset}
+                            size="xl"
+                            className="group"
+                            variant="secondary"
+                        >
+                            <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
+                            <span>Restart</span>
+                        </Button>
+                        <Button
+                            onClick={continueGame}
+                            size="xl"
+                            className="group"
+                        >
+                            <StepForward className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
+                            <span>Continue</span>
+                        </Button>
+                    </div>
                 </>
             ) : (
                 <>
                     {gameState.isIdle ? (
-                        <div className="flex h-full w-full flex-col items-center justify-center">
-                            <p className="mb-8 text-lg font-semibold sm:text-3xl">
+                        <div className="flex h-full w-full flex-col items-center justify-center px-4">
+                            <p className="mb-8 text-center text-3xl font-medium text-muted-foreground sm:text-5xl">
                                 Click start when you are ready!
                             </p>
                             <Button onClick={start} size="xl" className="group">
@@ -87,11 +104,12 @@ function GameUI() {
                         <>
                             <h1
                                 className={cn(
-                                    "text-6xl font-bold",
+                                    "text-3xl font-bold sm:text-5xl",
                                     level < 0 && "opacity-0"
                                 )}
                             >
-                                Level {level + 1}
+                                {gameState.hasCompletedGame && "👑"} Level{" "}
+                                {level + 1} {gameState.hasCompletedGame && "👑"}
                             </h1>
                             <Game>
                                 <Game.Board>
