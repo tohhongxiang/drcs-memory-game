@@ -65,72 +65,82 @@ export default function StartGame() {
                             </Button>
                         </div>
                     ) : (
-                        <Game>
-                            <Game.Board>
-                                {cells.map(({ id, selected, isTarget }) => (
-                                    <Game.Cell
-                                        key={id}
-                                        selected={selected}
-                                        isTarget={isTarget}
-                                        isRevealed={isRevealed}
-                                        onClick={() => selectCell(id)}
-                                    >
-                                        {gameState.isGameOver &&
-                                            selected !== isTarget && (
-                                                <X className="h-full w-full text-red-600" />
-                                            )}
-                                    </Game.Cell>
-                                ))}
-                            </Game.Board>
-                            <Game.Overlay>
-                                {showSuccess ? <SuccessOverlay /> : null}
-                                {showReady ? (
-                                    <ReadyOverlay
-                                        readyCountdownTimeMs={
-                                            readyCountdownTimeMs
-                                        }
-                                    />
-                                ) : null}
-                            </Game.Overlay>
-                        </Game>
-                    )}
-                    <ProgressTimer progress={revealTimer / REVEAL_TIME} />
-                    <div className="flex w-full flex-col items-center justify-center gap-4">
-                        {gameState.isRunning && (
-                            <Button
-                                size="xl"
-                                onClick={confirmUserSelection}
-                                className={cn(
-                                    "group",
-                                    showSuccess ? "bg-emerald-500" : ""
-                                )}
-                                disabled={
-                                    isRevealed || isGenerating || showSuccess
-                                }
-                            >
-                                <span className="flex items-center">
-                                    {showSuccess ? (
-                                        "Success!"
-                                    ) : isRevealed ? (
-                                        "Memorizing..."
-                                    ) : isGenerating ? (
-                                        "Generating..."
-                                    ) : (
-                                        <>
-                                            <span>Confirm</span>
-                                            <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
-                                        </>
+                        <>
+                            <Game>
+                                <Game.Board>
+                                    {cells.map(({ id, selected, isTarget }) => (
+                                        <Game.Cell
+                                            key={id}
+                                            selected={selected}
+                                            isTarget={isTarget}
+                                            isRevealed={isRevealed}
+                                            onClick={() => selectCell(id)}
+                                        >
+                                            {gameState.isGameOver &&
+                                                selected !== isTarget && (
+                                                    <X className="h-full w-full text-red-600" />
+                                                )}
+                                        </Game.Cell>
+                                    ))}
+                                </Game.Board>
+                                <Game.Overlay>
+                                    {showSuccess ? <SuccessOverlay /> : null}
+                                    {showReady ? (
+                                        <ReadyOverlay
+                                            readyCountdownTimeMs={
+                                                readyCountdownTimeMs
+                                            }
+                                        />
+                                    ) : null}
+                                </Game.Overlay>
+                            </Game>
+                            <ProgressTimer
+                                progress={revealTimer / REVEAL_TIME}
+                            />
+                            {gameState.isGameOver ? (
+                                <Button
+                                    onClick={reset}
+                                    size="xl"
+                                    className="group"
+                                >
+                                    <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
+                                    <span>Restart</span>
+                                </Button>
+                            ) : (
+                                <Button
+                                    size="xl"
+                                    onClick={confirmUserSelection}
+                                    className={cn(
+                                        "group",
+                                        showSuccess ? "bg-emerald-500" : ""
                                     )}
-                                </span>
-                            </Button>
-                        )}
-                        {gameState.isGameOver && (
-                            <Button onClick={reset} size="xl" className="group">
-                                <RotateCcw className="mr-4 h-8 w-8 transition duration-150 group-focus-within:-rotate-180 group-hover:-rotate-180" />{" "}
-                                <span>Restart</span>
-                            </Button>
-                        )}
-                    </div>
+                                    disabled={
+                                        isRevealed ||
+                                        isGenerating ||
+                                        showSuccess ||
+                                        gameState.isStarting
+                                    }
+                                >
+                                    <span className="flex items-center">
+                                        {showSuccess ? (
+                                            "Success!"
+                                        ) : isRevealed ? (
+                                            "Memorizing..."
+                                        ) : isGenerating ? (
+                                            "Generating..."
+                                        ) : gameState.isStarting ? (
+                                            "Starting..."
+                                        ) : (
+                                            <>
+                                                <span>Confirm</span>
+                                                <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
+                                            </>
+                                        )}
+                                    </span>
+                                </Button>
+                            )}
+                        </>
+                    )}
                 </>
             )}
         </div>

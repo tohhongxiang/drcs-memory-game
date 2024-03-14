@@ -60,24 +60,31 @@ export default function useGame({
     );
 
     const [isRevealed, setIsRevealed] = useState(false);
-    const { msRemaining: revealTimer, startTimer: startRevealTimer } =
-        useCountdown({
-            onTimerStart: () => {
-                setIsRevealed(true);
-            },
-            onTimerEnd: () => {
-                setIsRevealed(false);
-            },
-        });
+    const {
+        msRemaining: revealTimer,
+        startTimer: startRevealTimer,
+        resetTimer: resetRevealTimer,
+    } = useCountdown({
+        timeMs: revealTimeMs,
+        onTimerStart: () => {
+            setIsRevealed(true);
+        },
+        onTimerEnd: () => {
+            setIsRevealed(false);
+        },
+    });
 
     const [isGenerating, setIsGenerating] = useState(false);
     const startLevel = async (newLevel: number) => {
         setIsGenerating(true);
+
         setIsRevealed(false);
         setLevel(newLevel);
         setCells((previousCells) =>
             previousCells.map((c) => ({ ...c, selected: false }))
         );
+
+        resetRevealTimer();
 
         await new Promise((resolve) => setTimeout(resolve, 400));
 
@@ -90,7 +97,7 @@ export default function useGame({
 
         await new Promise((resolve) => setTimeout(resolve, 700));
         setIsGenerating(false);
-        startRevealTimer(revealTimeMs);
+        startRevealTimer();
     };
 
     const [showReady, setShowReady] = useState(false);
@@ -98,6 +105,7 @@ export default function useGame({
         msRemaining: readyCountdownTimeMs,
         startTimer: startReadyCountdown,
     } = useCountdown({
+        timeMs: startTimeMs - 1,
         onTimerStart: () => {
             setCells(
                 initializeCells(
@@ -117,7 +125,7 @@ export default function useGame({
     });
 
     const start = async () => {
-        startReadyCountdown(startTimeMs - 1);
+        startReadyCountdown();
     };
 
     const levelUp = async () => {
@@ -131,6 +139,7 @@ export default function useGame({
 
     const [showSuccess, setShowSuccess] = useState(false);
     const { startTimer: startSuccessTimer } = useCountdown({
+        timeMs: revealTimeMs,
         onTimerStart: async () => {
             setShowSuccess(true);
             setIsRevealed(true);
@@ -156,7 +165,7 @@ export default function useGame({
         );
 
         if (succeeded) {
-            startSuccessTimer(revealTimeMs);
+            startSuccessTimer();
         } else {
             gameOver();
         }

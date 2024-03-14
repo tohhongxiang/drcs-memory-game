@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 interface UseCountdownProps {
+    timeMs: number;
     onTimerStart?: () => void | Promise<void>;
     onTimerEnd?: () => void | Promise<void>;
 }
@@ -13,12 +14,12 @@ enum CountDownState {
 }
 
 export default function useCountdown({
+    timeMs,
     onTimerStart = () => {},
     onTimerEnd = () => {},
-}: UseCountdownProps = {}) {
+}: UseCountdownProps) {
     const [countdownState, setCountdownState] = useState(CountDownState.IDLE);
-    const [timeMs, setTimeMs] = useState(0);
-    const [msRemaining, setMsRemaining] = useState(0);
+    const [msRemaining, setMsRemaining] = useState(timeMs);
 
     useEffect(() => {
         if (msRemaining <= 0) {
@@ -34,8 +35,8 @@ export default function useCountdown({
 
         if (countdownState === CountDownState.STARTED) {
             timeout = setTimeout(() => {
-                setMsRemaining((c) => c - 10);
-            }, 10);
+                setMsRemaining((c) => c - 100);
+            }, 100);
         }
 
         return () => {
@@ -43,11 +44,14 @@ export default function useCountdown({
         };
     }, [msRemaining, countdownState, onTimerEnd]);
 
-    const startTimer = (timeMs: number) => {
+    const startTimer = () => {
         setCountdownState(CountDownState.STARTED);
-        setTimeMs(timeMs);
         setMsRemaining(timeMs);
         onTimerStart?.();
+    };
+
+    const resetTimer = () => {
+        setMsRemaining(timeMs);
     };
 
     const pauseTimer = () => {
@@ -63,6 +67,7 @@ export default function useCountdown({
         progress: msRemaining / timeMs,
         countdownState,
         startTimer,
+        resetTimer,
         pauseTimer,
         resumeTimer,
     };
