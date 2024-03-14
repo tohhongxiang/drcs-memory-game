@@ -1,9 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+    themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
+    minimumScale: 1,
+    initialScale: 1,
+    width: "device-width",
+    viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
     title: "DRCS Memory Game",
@@ -19,10 +27,6 @@ export const metadata: Metadata = {
         "memory-game",
         "game",
     ],
-
-    themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
-    viewport:
-        "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
     authors: [
         { name: "Toh Hong Xiang" },
         {
@@ -32,8 +36,8 @@ export const metadata: Metadata = {
     ],
 
     icons: [
-        { rel: "apple-touch-icon", url: "icons/icon-128x128.png" },
-        { rel: "icon", url: "icons/icon-128x128.png" },
+        { rel: "apple-touch-icon", url: "icons/icon-192x192.png" },
+        { rel: "icon", url: "icons/icon-192x192.png" },
     ],
 };
 
