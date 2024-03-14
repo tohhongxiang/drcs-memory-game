@@ -1,7 +1,7 @@
 declare module "use-sound" {
     import { Howl } from "howler";
 
-    interface HookOptions {
+    export interface HookOptions {
         volume?: number;
         playbackRate?: number;
         interrupt?: boolean;
@@ -35,7 +35,7 @@ declare module "use-sound" {
         sound: Howl | null;
     }
 
-    type UseSoundTuple = [PlayFunction, PlayExposedData];
+    export type UseSoundTuple = [PlayFunction, PlayExposedData];
 
     const useSound: (src: string, options?: HookOptions) => UseSoundTuple;
 

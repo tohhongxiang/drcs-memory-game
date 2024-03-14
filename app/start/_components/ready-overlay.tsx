@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import useSound from "use-sound";
+import { useMutedContext } from "../_providers/muted-provider";
+import useSoundWithMutedContext from "../hooks/use-sound-with-muted-context";
 
 export default function ReadyOverlay({
     readyCountdownTimeMs,
@@ -7,8 +8,12 @@ export default function ReadyOverlay({
     readyCountdownTimeMs: number;
 }) {
     const ref = useRef<HTMLParagraphElement | null>(null);
-    const [playGo, { stop: stopGo }] = useSound("./correct.mp3");
-    const [playReady, { stop: stopReady }] = useSound("./reveal.mp3");
+    const [playGo, { stop: stopGo }] =
+        useSoundWithMutedContext("./correct.mp3");
+    const [playReady, { stop: stopReady }] =
+        useSoundWithMutedContext("./reveal.mp3");
+
+    const { isMuted } = useMutedContext();
 
     useEffect(() => {
         if (readyCountdownTimeMs > 1000) {
@@ -20,7 +25,7 @@ export default function ReadyOverlay({
             stopReady();
             stopGo();
         };
-    }, [readyCountdownTimeMs, playReady, playGo, stopReady, stopGo]);
+    }, [readyCountdownTimeMs, playReady, playGo, stopReady, stopGo, isMuted]);
 
     return (
         <div

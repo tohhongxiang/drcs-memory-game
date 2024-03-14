@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useCountdown from "./use-countdown";
-import useSound from "use-sound";
 import useLevelState from "./use-level-state";
+import useSoundWithMutedContext from "./use-sound-with-muted-context";
 
 const levels = [
     { size: 3, targets: 3 },
@@ -39,8 +39,8 @@ export default function useGame({
     const { cells, level, deselectAll, initializeLevel, selectCell } =
         useLevelState(levels);
 
-    const [playReveal] = useSound("./reveal.mp3");
-    const [playGo] = useSound("./go.mp3");
+    const [playReveal] = useSoundWithMutedContext("./reveal.mp3");
+    const [playGo] = useSoundWithMutedContext("./go.mp3");
 
     const {
         msRemaining: revealCountdownTimeMs,
@@ -112,7 +112,7 @@ export default function useGame({
         },
     });
 
-    const [playSelect] = useSound("./select.mp3", {
+    const [playSelect] = useSoundWithMutedContext("./select.mp3", {
         playbackRate: 0.75 + cells.filter((c) => c.selected).length * 0.16,
     });
 
@@ -121,8 +121,8 @@ export default function useGame({
         selectCell(id);
     };
 
-    const [playCorrect] = useSound("./correct.mp3");
-    const [playWrong] = useSound("./wrong.mp3");
+    const [playCorrect] = useSoundWithMutedContext("./correct.mp3");
+    const [playWrong] = useSoundWithMutedContext("./wrong.mp3");
 
     const confirmUserSelection = () => {
         const succeeded = cells.every(

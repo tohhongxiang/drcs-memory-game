@@ -3,16 +3,34 @@
 import { Button } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
-import { Play, RotateCcw, SendHorizonal, X } from "lucide-react";
+import {
+    Play,
+    RotateCcw,
+    SendHorizonal,
+    Volume2,
+    VolumeX,
+    X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProgressTimer from "./_components/progress-timer";
 import SuccessOverlay from "./_components/success-overlay";
 import ReadyOverlay from "./_components/ready-overlay";
+import MutedContextProvider, {
+    useMutedContext,
+} from "./_providers/muted-provider";
 
 const START_TIME = 4000;
 const REVEAL_TIME = 1000;
 
-export default function StartGame() {
+export default function StartGamePage() {
+    return (
+        <MutedContextProvider>
+            <GameUI />
+        </MutedContextProvider>
+    );
+}
+
+function GameUI() {
     const {
         gameState,
         readyCountdownTimeMs,
@@ -24,8 +42,21 @@ export default function StartGame() {
         confirmUserSelection,
     } = useGame({ startTimeMs: START_TIME, revealTimeMs: REVEAL_TIME });
 
+    const { isMuted, toggleMuted } = useMutedContext();
+
     return (
         <div className="flex h-full flex-col items-center justify-center gap-4">
+            <Button
+                className="absolute right-4 top-4 h-16 w-16"
+                onClick={toggleMuted}
+                variant="outline"
+            >
+                {isMuted ? (
+                    <VolumeX className="h-full w-full" />
+                ) : (
+                    <Volume2 className="h-full w-full" />
+                )}
+            </Button>
             {gameState.isCompleted ? (
                 <>
                     <h1 className="mb-4 text-3xl font-bold sm:text-5xl">
