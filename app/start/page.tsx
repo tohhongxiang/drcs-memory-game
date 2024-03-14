@@ -50,6 +50,7 @@ function GameUI() {
                 className="absolute right-4 top-4 h-16 w-16"
                 onClick={toggleMuted}
                 variant="outline"
+                aria-label="Toggle sound"
             >
                 {isMuted ? (
                     <VolumeX className="h-full w-full" />

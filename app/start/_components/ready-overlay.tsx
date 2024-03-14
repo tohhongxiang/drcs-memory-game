@@ -8,10 +8,11 @@ export default function ReadyOverlay({
     readyCountdownTimeMs: number;
 }) {
     const ref = useRef<HTMLParagraphElement | null>(null);
-    const [playGo, { stop: stopGo }] =
-        useSoundWithMutedContext("./correct.mp3");
+    const [playGo, { stop: stopGo }] = useSoundWithMutedContext(
+        "./audio/correct.mp3"
+    );
     const [playReady, { stop: stopReady }] =
-        useSoundWithMutedContext("./reveal.mp3");
+        useSoundWithMutedContext("./audio/reveal.mp3");
 
     const { isMuted } = useMutedContext();
 

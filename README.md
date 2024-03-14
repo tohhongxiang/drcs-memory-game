@@ -64,3 +64,7 @@ Your task is to create a web-based memory game using React JS. In this game, pla
 -   Incorporate animations for transitions, success, or failure states to enhance user engagement.
 -   Add sound effects for game actions to improve the user experience.
 -   Consider using TypeScript for development to leverage type safety and enhance code quality.
+
+## Resources
+
+-   https://www.simicart.com/manifest-generator.html/
