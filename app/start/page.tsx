@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
 import {
+    Book,
     Play,
     RotateCcw,
     SendHorizonal,
@@ -19,6 +20,7 @@ import ReadyOverlay from "./_components/ready-overlay";
 import MutedContextProvider, {
     useMutedContext,
 } from "./_providers/muted-provider";
+import InstructionsDialog from "./_components/instructions-dialog";
 
 const START_TIME = 4000;
 const REVEAL_TIME = 1000;
@@ -95,10 +97,26 @@ function GameUI() {
                             <p className="mb-8 text-center text-3xl font-medium text-muted-foreground sm:text-5xl">
                                 Click start when you are ready!
                             </p>
-                            <Button onClick={start} size="xl" className="group">
-                                <Play className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
-                                <span>Start</span>
-                            </Button>
+                            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                                <Button
+                                    onClick={start}
+                                    size="xl"
+                                    className="group"
+                                >
+                                    <Play className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
+                                    <span>Start</span>
+                                </Button>
+                                <InstructionsDialog>
+                                    <Button
+                                        size="xl"
+                                        className="group"
+                                        variant="outline"
+                                    >
+                                        <Book className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
+                                        <span>Instructions</span>
+                                    </Button>
+                                </InstructionsDialog>
+                            </div>
                         </div>
                     ) : (
                         <>
