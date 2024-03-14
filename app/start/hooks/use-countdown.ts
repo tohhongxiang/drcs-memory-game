@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseCountdownProps {
     timeMs: number;
+    intervalMs?: number;
     onTimerStart?: () => void | Promise<void>;
     onTimerEnd?: () => void | Promise<void>;
 }
@@ -15,6 +16,7 @@ enum CountDownState {
 
 export default function useCountdown({
     timeMs,
+    intervalMs = 100,
     onTimerStart = () => {},
     onTimerEnd = () => {},
 }: UseCountdownProps) {
@@ -35,32 +37,32 @@ export default function useCountdown({
 
         if (countdownState === CountDownState.STARTED) {
             timeout = setTimeout(() => {
-                setMsRemaining((c) => c - 100);
-            }, 100);
+                setMsRemaining((c) => c - intervalMs);
+            }, intervalMs);
         }
 
         return () => {
             if (timeout) clearTimeout(timeout);
         };
-    }, [msRemaining, countdownState, onTimerEnd]);
+    }, [msRemaining, countdownState, onTimerEnd, intervalMs]);
 
-    const startTimer = () => {
+    const startTimer = useCallback(() => {
         setCountdownState(CountDownState.STARTED);
         setMsRemaining(timeMs);
         onTimerStart?.();
-    };
+    }, [onTimerStart, timeMs]);
 
-    const resetTimer = () => {
+    const resetTimer = useCallback(() => {
         setMsRemaining(timeMs);
-    };
+    }, [timeMs]);
 
-    const pauseTimer = () => {
+    const pauseTimer = useCallback(() => {
         setCountdownState(CountDownState.PAUSED);
-    };
+    }, []);
 
-    const resumeTimer = () => {
+    const resumeTimer = useCallback(() => {
         setCountdownState(CountDownState.STARTED);
-    };
+    }, []);
 
     return {
         msRemaining,

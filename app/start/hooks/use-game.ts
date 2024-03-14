@@ -1,6 +1,7 @@
 import shuffle from "@/lib/shuffle";
 import { useState } from "react";
 import useCountdown from "./use-countdown";
+import useSound from "use-sound";
 
 function initializeCells(count: number, numberOfTargets: number) {
     if (numberOfTargets > count) {
@@ -59,6 +60,9 @@ export default function useGame({
         initializeCells(levels[0].size * levels[0].size, 0)
     );
 
+    const [playReveal] = useSound("./reveal.mp3");
+    const [playGo] = useSound("./go.mp3");
+
     const [isRevealed, setIsRevealed] = useState(false);
     const {
         msRemaining: revealTimer,
@@ -66,11 +70,13 @@ export default function useGame({
         resetTimer: resetRevealTimer,
     } = useCountdown({
         timeMs: revealTimeMs,
-        onTimerStart: () => {
+        onTimerStart() {
             setIsRevealed(true);
+            playReveal();
         },
-        onTimerEnd: () => {
+        onTimerEnd() {
             setIsRevealed(false);
+            playGo();
         },
     });
 
@@ -105,8 +111,9 @@ export default function useGame({
         msRemaining: readyCountdownTimeMs,
         startTimer: startReadyCountdown,
     } = useCountdown({
-        timeMs: startTimeMs - 1,
-        onTimerStart: () => {
+        timeMs: startTimeMs,
+        intervalMs: 1000,
+        onTimerStart() {
             setCells(
                 initializeCells(
                     levels[0].size * levels[0].size,
@@ -116,7 +123,7 @@ export default function useGame({
             setGameState(GameState.STARTING);
             setShowReady(true);
         },
-        onTimerEnd: async () => {
+        async onTimerEnd() {
             setShowReady(false);
 
             setGameState(GameState.RUNNING);
@@ -140,18 +147,23 @@ export default function useGame({
     const [showSuccess, setShowSuccess] = useState(false);
     const { startTimer: startSuccessTimer } = useCountdown({
         timeMs: revealTimeMs,
-        onTimerStart: async () => {
+        onTimerStart() {
             setShowSuccess(true);
             setIsRevealed(true);
         },
-        onTimerEnd: async () => {
+        onTimerEnd() {
             setShowSuccess(false);
             setIsRevealed(false);
             levelUp();
         },
     });
 
+    const [playSelect] = useSound("./select.mp3", {
+        playbackRate: 0.75 + cells.filter((c) => c.selected).length * 0.16,
+    });
+
     const selectCell = (id: number) => {
+        playSelect();
         setCells((previousCells) =>
             previousCells.map((cell) =>
                 cell.id === id ? { ...cell, selected: !cell.selected } : cell
@@ -159,14 +171,19 @@ export default function useGame({
         );
     };
 
+    const [playCorrect] = useSound("./correct.mp3");
+    const [playWrong] = useSound("./wrong.mp3");
+
     const confirmUserSelection = () => {
         const succeeded = cells.every(
             (cell) => cell.selected === cell.isTarget
         );
 
         if (succeeded) {
+            playCorrect();
             startSuccessTimer();
         } else {
+            playWrong();
             gameOver();
         }
     };
