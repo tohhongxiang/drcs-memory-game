@@ -1,6 +1,8 @@
 # Memory Game
 
-Take-home assignment for DRCS
+Take-home assignment for DRCS.
+
+Demo: https://drcs-memory-game.vercel.app/
 
 ## Setup
 
@@ -11,6 +13,18 @@ cd drcs-memory-game
 npm install
 npm run dev
 ```
+
+## Preview of Interface
+
+![](./screenshots/preview.gif)
+![](./screenshots/before-begin.png)
+![](./screenshots/instructions-modal.png)
+![](./screenshots/starting-level.png)
+![](./screenshots/example-level.png)
+![](./screenshots/game-success.png)
+![](./screenshots/game-over.png)
+![](./screenshots/mobile-view-1.png)
+![](./screenshots/mobile-view-2.png)
 
 ## Task Description
 
