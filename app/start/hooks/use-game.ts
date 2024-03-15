@@ -28,6 +28,8 @@ enum GameState {
     COMPLETE = "COMPLETE",
 }
 
+const DEFAULT_HINTS = 3;
+
 export default function useGame({
     startTimeMs,
     revealTimeMs,
@@ -140,6 +142,13 @@ export default function useGame({
         }
     };
 
+    const [hintsRemaining, setHintsRemaining] = useState(DEFAULT_HINTS);
+    const getHint = () => {
+        if (hintsRemaining === 0) return;
+        setHintsRemaining((c) => c - 1);
+        startRevealTimer();
+    };
+
     const gameOver = () => {
         setGameState(GameState.FAILED);
     };
@@ -147,6 +156,7 @@ export default function useGame({
     const reset = () => {
         setHasCompletedGame(false);
         setGameState(GameState.IDLE);
+        setHintsRemaining(DEFAULT_HINTS);
         initializeLevel(0);
     };
 
@@ -175,6 +185,8 @@ export default function useGame({
             level,
             cells,
         },
+        hintsRemaining,
+        getHint,
         revealCountdownTimeMs,
         readyCountdownTimeMs,
         start,

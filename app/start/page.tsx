@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Game from "./_components/game";
 import useGame from "./hooks/use-game";
 import {
     Book,
+    Lightbulb,
     Play,
     RotateCcw,
     SendHorizonal,
@@ -39,6 +40,8 @@ function GameUI() {
         readyCountdownTimeMs,
         revealCountdownTimeMs,
         levelInfo: { level, cells },
+        hintsRemaining,
+        getHint,
         start,
         reset,
         continueGame,
@@ -107,14 +110,16 @@ function GameUI() {
                                     <span>Start</span>
                                 </Button>
                                 <InstructionsDialog>
-                                    <Button
-                                        size="xl"
-                                        className="group"
-                                        variant="outline"
+                                    <div
+                                        className={buttonVariants({
+                                            size: "xl",
+                                            variant: "outline",
+                                            className: "group",
+                                        })}
                                     >
-                                        <Book className="mr-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />{" "}
+                                        <Book className="mr-4 h-8 w-8 transition duration-150 group-focus-within:scale-105 group-hover:scale-105" />{" "}
                                         <span>Instructions</span>
-                                    </Button>
+                                    </div>
                                 </InstructionsDialog>
                             </div>
                         </div>
@@ -175,14 +180,26 @@ function GameUI() {
                                     <span>Restart</span>
                                 </Button>
                             ) : gameState.isWaitingUserInput ? (
-                                <Button
-                                    size="xl"
-                                    onClick={confirmUserSelection}
-                                    className="group flex items-center"
-                                >
-                                    <span>Confirm</span>
-                                    <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
-                                </Button>
+                                <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                                    <Button
+                                        size="xl"
+                                        onClick={getHint}
+                                        className="group flex items-center"
+                                        variant="outline"
+                                        disabled={hintsRemaining === 0}
+                                    >
+                                        <span>Hint ({hintsRemaining})</span>
+                                        <Lightbulb className="ml-4 h-8 w-8 transition duration-150 group-focus-within:scale-105 group-hover:scale-105" />
+                                    </Button>
+                                    <Button
+                                        size="xl"
+                                        onClick={confirmUserSelection}
+                                        className="group flex items-center"
+                                    >
+                                        <span>Confirm</span>
+                                        <SendHorizonal className="ml-4 h-8 w-8 transition duration-150 group-focus-within:translate-x-1 group-hover:translate-x-1" />
+                                    </Button>
+                                </div>
                             ) : gameState.isShowingSuccess ? (
                                 <Button
                                     size="xl"
