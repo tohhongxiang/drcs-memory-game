@@ -5,11 +5,14 @@ import { VolumeX, Volume2 } from "lucide-react";
 import MutedContextProvider, {
     useMutedContext,
 } from "./_providers/muted-provider";
+import { LazyMotion, domMax } from "framer-motion";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <MutedContextProvider>
-            <StartLayout>{children}</StartLayout>
+            <LazyMotion features={domMax}>
+                <StartLayout>{children}</StartLayout>
+            </LazyMotion>
         </MutedContextProvider>
     );
 }

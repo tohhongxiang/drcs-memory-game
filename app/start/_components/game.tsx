@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 export default function Game({ children }: { children: React.ReactNode[] }) {
     return (
@@ -22,7 +22,7 @@ const gameboardVariants = {
 
 function GameBoard({ children }: { children: React.ReactNode[] }) {
     return (
-        <motion.div
+        <m.div
             layout
             variants={gameboardVariants}
             initial="hidden"
@@ -33,7 +33,7 @@ function GameBoard({ children }: { children: React.ReactNode[] }) {
             className="grid aspect-square h-full w-full gap-1 md:gap-2"
         >
             {children}
-        </motion.div>
+        </m.div>
     );
 }
 
@@ -62,7 +62,7 @@ function GameCell({
     ...props
 }: GameCellProps) {
     return (
-        <motion.div
+        <m.div
             layout
             variants={gameCellVariants}
             className={cn(
@@ -84,7 +84,7 @@ function GameCell({
             >
                 {children}
             </button>
-        </motion.div>
+        </m.div>
     );
 }
 

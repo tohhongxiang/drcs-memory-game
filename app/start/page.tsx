@@ -17,7 +17,7 @@ import ProgressTimer from "./_components/progress-timer";
 import SuccessOverlay from "./_components/success-overlay";
 import ReadyOverlay from "./_components/ready-overlay";
 import InstructionsDialog from "./_components/instructions-dialog";
-import { motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 
 const START_TIME = 4000;
 const REVEAL_TIME = 1000;
@@ -137,19 +137,21 @@ export default function StartGamePage() {
                 <ProgressTimer progress={revealCountdownTimeMs / REVEAL_TIME} />
             </div>
             <div className="flex h-[25%] flex-col items-center gap-4 sm:flex-row">
-                <ShowButtonBasedOnGameState
-                    gameState={gameState}
-                    reset={reset}
-                    getHint={getHint}
-                    hintsRemaining={hintsRemaining}
-                    confirmUserSelection={confirmUserSelection}
-                />
+                <AnimatePresence>
+                    <ShowButtonBasedOnGameState
+                        gameState={gameState}
+                        reset={reset}
+                        getHint={getHint}
+                        hintsRemaining={hintsRemaining}
+                        confirmUserSelection={confirmUserSelection}
+                    />
+                </AnimatePresence>
             </div>
         </div>
     );
 }
 
-const MotionButton = motion(Button);
+const MotionButton = m(Button);
 const buttonAnimationVariants = {
     hidden: { opacity: 0, y: -10 },
     show: {
@@ -192,7 +194,7 @@ function ShowButtonBasedOnGameState({
 
     if (gameState.isShowingSuccess) {
         return (
-            <motion.div
+            <m.div
                 variants={buttonAnimationVariants}
                 initial="hidden"
                 animate="show"
@@ -208,13 +210,13 @@ function ShowButtonBasedOnGameState({
                 >
                     Success!
                 </div>
-            </motion.div>
+            </m.div>
         );
     }
 
     if (gameState.isRevealed) {
         return (
-            <motion.div
+            <m.div
                 variants={buttonAnimationVariants}
                 initial="hidden"
                 animate="show"
@@ -225,18 +227,18 @@ function ShowButtonBasedOnGameState({
                 <div
                     className={cn(
                         buttonVariants({ size: "xl", variant: "secondary" }),
-                        "opacity-70"
+                        "bg-gray-300 opacity-70"
                     )}
                 >
                     Memorizing...
                 </div>
-            </motion.div>
+            </m.div>
         );
     }
 
     if (gameState.isGenerating) {
         return (
-            <motion.div
+            <m.div
                 variants={buttonAnimationVariants}
                 initial="hidden"
                 animate="show"
@@ -247,18 +249,18 @@ function ShowButtonBasedOnGameState({
                 <div
                     className={cn(
                         buttonVariants({ size: "xl", variant: "secondary" }),
-                        "opacity-70"
+                        "bg-gray-300 opacity-70"
                     )}
                 >
                     Generating...
                 </div>
-            </motion.div>
+            </m.div>
         );
     }
 
     if (gameState.isStarting) {
         return (
-            <motion.div
+            <m.div
                 variants={buttonAnimationVariants}
                 initial="hidden"
                 animate="show"
@@ -269,18 +271,18 @@ function ShowButtonBasedOnGameState({
                 <div
                     className={cn(
                         buttonVariants({ size: "xl", variant: "secondary" }),
-                        "opacity-70"
+                        "bg-gray-300 opacity-70"
                     )}
                 >
                     Starting...
                 </div>
-            </motion.div>
+            </m.div>
         );
     }
 
     return (
         <>
-            <motion.div
+            <m.div
                 variants={buttonAnimationVariants}
                 initial="hidden"
                 animate="show"
@@ -297,7 +299,7 @@ function ShowButtonBasedOnGameState({
                     <span>Hint ({hintsRemaining})</span>
                     <Lightbulb className="ml-4 h-8 w-8 transition duration-150 group-focus-within:scale-105 group-hover:scale-105" />
                 </Button>
-            </motion.div>
+            </m.div>
             <MotionButton
                 variants={buttonAnimationVariants}
                 initial="hidden"
