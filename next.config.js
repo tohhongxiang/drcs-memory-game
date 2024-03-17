@@ -19,5 +19,10 @@ const withPWA = require("next-pwa")({
     buildExcludes: [/middleware-manifest.json$/],
 });
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+    enabled: process.env.ANALYZE === "true",
+});
+
 // Export the combined configuration for Next.js with PWA support
-module.exports = withPWA(nextConfig);
+module.exports = withBundleAnalyzer(withPWA(nextConfig));
