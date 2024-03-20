@@ -1,6 +1,7 @@
 import { m } from "framer-motion";
+import { memo } from "react";
 
-export default function ProgressTimer({ progress }: { progress: number }) {
+function ProgressTimer({ progress }: { progress: number }) {
     return (
         <div className="flex h-4 w-full flex-col items-center justify-stretch px-8">
             <m.div
@@ -12,3 +13,5 @@ export default function ProgressTimer({ progress }: { progress: number }) {
         </div>
     );
 }
+
+export default memo(ProgressTimer);

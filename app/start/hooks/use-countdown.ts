@@ -25,16 +25,10 @@ export default function useCountdown({
 
     useEffect(() => {
         if (msRemaining <= 0) {
-            if (countdownState === CountDownState.STARTED) {
-                setCountdownState(CountDownState.STOPPED);
-                onTimerEnd?.();
-            }
-            setMsRemaining(0);
             return;
         }
 
         let timeout: NodeJS.Timeout | null = null;
-
         if (countdownState === CountDownState.STARTED) {
             timeout = setTimeout(() => {
                 setMsRemaining((c) => c - intervalMs);
@@ -44,7 +38,15 @@ export default function useCountdown({
         return () => {
             if (timeout) clearTimeout(timeout);
         };
-    }, [msRemaining, countdownState, onTimerEnd, intervalMs]);
+    }, [msRemaining, countdownState, intervalMs]);
+
+    useEffect(() => {
+        if (msRemaining <= 0 && countdownState === CountDownState.STARTED) {
+            setCountdownState(CountDownState.STOPPED);
+            onTimerEnd?.();
+            setMsRemaining(0);
+        }
+    }, [onTimerEnd, countdownState, msRemaining]);
 
     const startTimer = useCallback(() => {
         setCountdownState(CountDownState.STARTED);

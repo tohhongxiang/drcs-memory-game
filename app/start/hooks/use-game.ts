@@ -84,18 +84,18 @@ export default function useGame({
         onTimerStart() {
             setGameState(GameState.STARTING);
         },
-        async onTimerEnd() {
+        onTimerEnd() {
             setGameState(GameState.RUNNING);
             beginLevel(level);
         },
     });
 
-    const start = async () => {
+    const start = () => {
         startReadyCountdown();
     };
 
     const [hasCompletedGame, setHasCompletedGame] = useState(false);
-    const levelUp = async () => {
+    const levelUp = () => {
         if (level === levels.length - 1 && !hasCompletedGame) {
             setHasCompletedGame(true);
             setGameState(GameState.COMPLETE);
@@ -108,6 +108,7 @@ export default function useGame({
 
     const { startTimer: startSuccessTimer } = useCountdown({
         timeMs: revealTimeMs,
+        intervalMs: revealTimeMs,
         onTimerStart() {
             setGameState(GameState.SHOW_SUCCESS);
         },
